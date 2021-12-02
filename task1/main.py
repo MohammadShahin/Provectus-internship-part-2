@@ -10,7 +10,9 @@ from utils import *
 
 
 NUM_MAPPERS = 3
-OUTPUT_FILE = '/home/mohammad/airflow/dags/output.csv'
+OUTPUT_FILE = '/home/<username>/airflow/dags/output.csv'
+TWEETS_FILE = '/home/<username>/airflow/dags/tweets.csv'
+
 
 default_args = {
     'owner': 'airflow',
