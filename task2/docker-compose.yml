@@ -84,6 +84,16 @@ services:
       retries: 5
     restart: always
 
+  pgadmin:
+    image: chorss/docker-pgadmin4
+    restart: always
+    volumes:
+      - ./pgadmin:/data
+    ports:
+      - 5050:5050
+    depends_on:
+      - postgres
+
   redis:
     image: redis:latest
     expose:
@@ -261,6 +271,39 @@ services:
       timeout: 10s
       retries: 5
     restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  minio:
+    image: bitnami/minio:latest
+    restart: always
+    environment:
+      - MINIO_ACCESS_KEY=minio-access-key
+      - MINIO_SECRET_KEY=minio-secret-key
+    volumes:
+      - ./minio:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+
+  minio-create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minio-access-key minio-secret-key;
+      /usr/bin/mc mb myminio/datalake;
+      /usr/bin/mc policy download myminio/datalake;
+      exit 0;
+      "
+
+  dag-runner:
+    <<: *airflow-common
+    command: > 
+      bash -c "airflow connections add 'postgres' --conn-host 'postgres' --conn-password 'airflow' --conn-login 'airflow' --conn-type 'Postgres' ; airflow connections add 'minio' --conn-type 'S3' --conn-extra '{\"aws_access_key_id\": \"minio-access-key\", \"aws_secret_access_key\": \"minio-secret-key\", \"host\": \"http://minio:9000\"}' ; airflow dags trigger WordCounting"
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
