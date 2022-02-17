@@ -13,7 +13,7 @@ All the tasks in this repository were done as part of Provectus internship part 
 
 <a name="task1-description"></a>
 ### Task description
-We were asked to implement MapReducer using Apache airflow to count the word counts in a csv file.
+We were asked to implement MapReducer using Apache airflow to find the word counts in a csv file.
 
 <a name="task1-solution-logic"></a>
 ### Solution logic
